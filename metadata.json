@@ -1,0 +1,37 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "Example-KiCad-Plugin",
+    "description": "Example-KiCad-Plugin description ...",
+    "description_full": "Example-KiCad-Plugin description_full ...",
+    "identifier": "com.github.Steffen-W.Example-KiCad-Plugin",
+    "type": "plugin",
+    "author": {
+        "name": "Steffen W.",
+        "contact": {
+            "github": "https://github.com/Steffen-W"
+        }
+    },
+    "maintainer": {
+        "name": "Steffen W.",
+        "contact": {
+            "github": "https://github.com/Steffen-W"
+        }
+    },
+    "license": "GPL-3.0",
+    "resources": {
+        "homepage": "https://github.com/Steffen-W/Example-KiCad-Plugin"
+    },
+    "tags": [
+        "library"
+    ],
+    "keep_on_update": [
+        ".*/config.ini"
+    ],
+    "versions": [
+        {
+            "version": "2024.00.00",
+            "status": "stable",
+            "kicad_version": "7.00"
+        }
+    ]
+}

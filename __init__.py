@@ -1,2 +1,3 @@
-from .Plugin_action import ActionKiCadPlugin
-ActionKiCadPlugin().register()
+from .example import Plugin_action
+
+Plugin_action.ActionKiCadPlugin().register()
