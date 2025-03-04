@@ -56,6 +56,8 @@ class ActionKiCadPlugin:
 if __name__ == "__main__":
     try:
         kicad = KiCad()
+        plugin = ActionKiCadPlugin()
+        plugin.defaults()
         print(f"Connected to KiCad {kicad.get_version()}")
     except BaseException as e:
         print(f"Not connected to KiCad: {e}")
