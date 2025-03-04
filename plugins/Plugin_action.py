@@ -1,6 +1,6 @@
-import pcbnew
 import os
 import wx
+from kipy import KiCad
 
 
 class MyDialog(wx.Dialog):
@@ -34,18 +34,28 @@ class KiCadPlugin(MyDialog):
         self.m_staticText.SetLabel("Done")
 
 
-class ActionKiCadPlugin(pcbnew.ActionPlugin):
+class ActionKiCadPlugin:
     def defaults(self):
+        print("defaults(self):")
         self.name = "Minimal KiCad Plugin"
         self.category = "Example"
-        self.description = "Minimalbeispiel eines KiCad Plugins"
+        self.description = "Minimal example of a KiCad plugin"
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
         self.dark_icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
 
     def Run(self):
-        board = pcbnew.GetBoard()
+        print("Run(self):")
+        kicad = KiCad()
+        board = kicad.get_board()
         plugin_dialog = KiCadPlugin(board, self)
         plugin_dialog.ShowModal()
         plugin_dialog.Destroy()
-        pcbnew.Refresh()
+
+
+if __name__ == "__main__":
+    try:
+        kicad = KiCad()
+        print(f"Connected to KiCad {kicad.get_version()}")
+    except BaseException as e:
+        print(f"Not connected to KiCad: {e}")
