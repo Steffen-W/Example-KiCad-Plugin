@@ -35,6 +35,11 @@ class KiCadPlugin(MyDialog):
 
 
 class ActionKiCadPlugin:
+
+    def __init__(self, kicad: KiCad = None):
+        self.kicad = kicad
+        print("init")
+
     def defaults(self):
         print("defaults(self):")
         self.name = "Minimal KiCad Plugin"
@@ -46,8 +51,8 @@ class ActionKiCadPlugin:
 
     def Run(self):
         print("Run(self):")
-        kicad = KiCad()
-        board = kicad.get_board()
+        # kicad = KiCad()
+        board = self.kicad.get_board()
         plugin_dialog = KiCadPlugin(board, self)
         plugin_dialog.ShowModal()
         plugin_dialog.Destroy()
@@ -56,8 +61,8 @@ class ActionKiCadPlugin:
 if __name__ == "__main__":
     try:
         kicad = KiCad()
-        plugin = ActionKiCadPlugin()
-        plugin.defaults()
+        plugin = ActionKiCadPlugin(kicad)
+        plugin.Run()
         print(f"Connected to KiCad {kicad.get_version()}")
     except BaseException as e:
         print(f"Not connected to KiCad: {e}")
