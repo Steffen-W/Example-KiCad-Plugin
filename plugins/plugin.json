@@ -1,10 +1,8 @@
 {
-  "$schema": "https://go.kicad.org/pcm/schemas/v1",
+  "$schema": "https://go.kicad.org/api/schemas/v1",
+  "identifier": "com.github.Steffen-W.Example-KiCad-Plugin",
   "name": "Example-KiCad-Plugin",
   "description": "Example-KiCad-Plugin description ...",
-  "description_full": "Example-KiCad-Plugin description_full ...",
-  "identifier": "com.github.Steffen-W.Example-KiCad-Plugin",
-  "type": "plugin",
   "runtime": {
     "type": "python",
     "version": "3"
@@ -14,21 +12,17 @@
       "identifier": "action",
       "name": "Example Action",
       "description": "This is an example action for the Example-KiCad-Plugin.",
-      "module": "Plugin_action",
-      "class": "ActionKiCadPlugin",
-      "entrypoint": "Plugin_action.py",
-      "toolbar_icon": "icon.png",
-      "icons-dark": [
-        "icon.png"
-      ],
-      "icons-light": [
-        "icon.png"
-      ],
-      "tooltip": "Example Plugin Action",
       "show-button": true,
       "scopes": [
         "pcb",
         "schematic"
+      ],
+      "entrypoint": "Plugin_action.py",
+      "icons-light": [
+        "icon.png"
+      ],
+      "icons-dark": [
+        "icon.png"
       ]
     }
   ]

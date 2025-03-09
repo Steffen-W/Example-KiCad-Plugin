@@ -1,6 +1,29 @@
 import os
-import wx
-from kipy import KiCad
+import sys
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s [%(filename)s:%(lineno)d]: %(message)s",
+    filename="plugin.log",
+    filemode="w",
+)
+
+try:
+    venv = os.environ.get("VIRTUAL_ENV")
+    if venv:
+        version = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        venv_site_packages = os.path.join(venv, "lib", version, "site-packages")
+
+        if venv_site_packages in sys.path:
+            sys.path.remove(venv_site_packages)
+
+        sys.path.insert(0, venv_site_packages)
+
+    import wx
+    from kipy import KiCad
+except Exception as e:
+    logging.exception("Import Module")
 
 
 class MyDialog(wx.Dialog):
@@ -23,10 +46,24 @@ class MyDialog(wx.Dialog):
 
 
 class KiCadPlugin(MyDialog):
-    def __init__(self, board, action):
+
+    def __init__(self, kicad: KiCad, board):
         super(KiCadPlugin, self).__init__(None)
         self.board = board
-        self.action = action
+        self.kicad = kicad
+
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.onTimer, self.timer)
+        self.timer.Start(1000)
+
+    def onTimer(self, event):
+        try:
+            self.kicad.ping()  # always returns zero
+        except:
+            logging.debug("ping failed.")
+            self.timer.Stop()
+            self.Close()
+        pass
 
     def run(self, event):
         self.m_staticText.SetLabel("Working...")
@@ -36,33 +73,33 @@ class KiCadPlugin(MyDialog):
 
 class ActionKiCadPlugin:
 
-    def __init__(self, kicad: KiCad = None):
+    def __init__(self, kicad: KiCad):
         self.kicad = kicad
-        print("init")
-
-    def defaults(self):
-        print("defaults(self):")
-        self.name = "Minimal KiCad Plugin"
-        self.category = "Example"
-        self.description = "Minimal example of a KiCad plugin"
-        self.show_toolbar_button = True
-        self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
-        self.dark_icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
+        self.Run()
 
     def Run(self):
-        print("Run(self):")
-        # kicad = KiCad()
-        board = self.kicad.get_board()
-        plugin_dialog = KiCadPlugin(board, self)
+        logging.debug("run()")
+        logging.debug(f"Connected to KiCad {self.kicad.get_version()}")
+        try:
+            board = self.kicad.get_board()
+        except:
+            board = None
+            logging.ERROR("Open board.")
+
+        plugin_dialog = KiCadPlugin(self.kicad, board)
         plugin_dialog.ShowModal()
         plugin_dialog.Destroy()
+        logging.debug("stop plugin")
 
 
 if __name__ == "__main__":
+    logging.debug("Start main()")
+    app = wx.App(False)
+
     try:
         kicad = KiCad()
         plugin = ActionKiCadPlugin(kicad)
-        plugin.Run()
-        print(f"Connected to KiCad {kicad.get_version()}")
-    except BaseException as e:
-        print(f"Not connected to KiCad: {e}")
+    except Exception as e:
+        logging.exception("__main__")
+
+    app.MainLoop()

@@ -5,11 +5,6 @@
     "description_full": "Example-KiCad-Plugin description_full ...",
     "identifier": "com.github.Steffen-W.Example-KiCad-Plugin",
     "type": "plugin",
-    "plugin": {
-        "module": "Plugin_action",
-        "class": "ActionKiCadPlugin",
-        "entry": "Run"
-    },
     "author": {
         "name": "Steffen W.",
         "contact": {
@@ -34,9 +29,9 @@
     ],
     "versions": [
         {
-            "version": "2024.00.00",
+            "version": "2025.00.00",
             "status": "stable",
-            "kicad_version": "7.00"
+            "kicad_version": "9.00"
         }
     ]
 }
