@@ -9,6 +9,8 @@ logging.basicConfig(
     filemode="w",
 )
 
+identifier = "Example-KiCad-Plugin-action"
+
 try:
     venv = os.environ.get("VIRTUAL_ENV")
     if venv:
@@ -21,7 +23,8 @@ try:
         sys.path.insert(0, venv_site_packages)
 
     import wx
-    from kipy import KiCad, errors
+    from kipy import KiCad, errors, board
+    from kipy.proto.common.types.base_types_pb2 import DocumentType
 except Exception as e:
     logging.exception("Import Module")
 
@@ -53,12 +56,53 @@ class KiCadPlugin(MyDialog):
     def __init__(self):
         super(KiCadPlugin, self).__init__(None)
         self.kicad = KiCad()
+
         logging.debug(f"Connected to KiCad {self.kicad.get_version()}")
-        self.board = None
+        # logging.debug(f"KiCad API Version {self.kicad.get_api_version()}") # buggy v0.2.0
+
+        # Next section is nice to have START
+
+        # if not self.kicad.check_version():  # buggy v0.2.0
+        #     print("KiCad version and kicad-python version dont match.")
+        #     logging.error("KiCad version and kicad-python version dont match.")
+        self.identifier = identifier
+        self.plugin_settings_path = self.kicad.get_plugin_settings_path(identifier)
+
+        # self.kicad.get_open_documents(DocumentType.DOCTYPE_SCHEMATIC)
+
         try:
-            self.board = self.kicad.get_board()
+            self.pcb_list = self.kicad.get_open_documents(DocumentType.DOCTYPE_PCB)
+            if len(self.pcb_list) == 1:
+                self.pcb_doc: DocumentType.DOCTYPE_PCB = self.pcb_list[0]
+                self.pcb_filename = self.pcb_doc.board_filename
+                self.pcb_path = self.pcb_doc.project.path
+                logging.debug(self.pcb_path)
+        except:
+            logging.error("Read DOCTYPE_PCB")
+            self.pcb_list = []
+
+        try:
+            self.SCHEMATIC_list = self.kicad.get_open_documents(
+                DocumentType.DOCTYPE_SCHEMATIC
+            )
+            if len(self.SCHEMATIC_list) == 1:
+                self.SCHEMATIC_doc: DocumentType.DOCTYPE_SCHEMATIC = (
+                    self.SCHEMATIC_list[0]
+                )
+                self.SCHEMATIC_filename = self.SCHEMATIC_doc.board_filename
+                # self.SCHEMATIC_path = self.SCHEMATIC_doc.project.path
+                logging.debug(self.SCHEMATIC_filename)
+        except:
+            logging.error("Read DOCTYPE_PCB")
+            self.SCHEMATIC_list = []
+
+        try:
+            self.board: board.Board = self.kicad.get_board()
         except:
             logging.error("Open board.")
+            self.board = None
+
+        # nice to have END
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer, self.timer)
@@ -66,7 +110,7 @@ class KiCadPlugin(MyDialog):
 
     def onTimer(self, event):
         try:
-            self.kicad.ping()  # always returns zero
+            self.kicad.ping()  # always returns zero v0.2.0
         except Exception:
             logging.debug("ping failed.")
             self.timer.Stop()

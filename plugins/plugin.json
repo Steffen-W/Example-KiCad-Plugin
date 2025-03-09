@@ -9,7 +9,7 @@
   },
   "actions": [
     {
-      "identifier": "action",
+      "identifier": "Example-KiCad-Plugin-action",
       "name": "Example Action",
       "description": "This is an example action for the Example-KiCad-Plugin.",
       "show-button": true,
