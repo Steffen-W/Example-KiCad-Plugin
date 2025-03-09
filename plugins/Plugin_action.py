@@ -21,7 +21,7 @@ try:
         sys.path.insert(0, venv_site_packages)
 
     import wx
-    from kipy import KiCad
+    from kipy import KiCad, errors
 except Exception as e:
     logging.exception("Import Module")
 
@@ -44,13 +44,21 @@ class MyDialog(wx.Dialog):
     def run(self, event):
         pass
 
+    def on_close(self, event):
+        self.EndModal(wx.ID_OK)
+
 
 class KiCadPlugin(MyDialog):
 
-    def __init__(self, kicad: KiCad, board):
+    def __init__(self):
         super(KiCadPlugin, self).__init__(None)
-        self.board = board
-        self.kicad = kicad
+        self.kicad = KiCad()
+        logging.debug(f"Connected to KiCad {self.kicad.get_version()}")
+        self.board = None
+        try:
+            self.board = self.kicad.get_board()
+        except:
+            logging.error("Open board.")
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer, self.timer)
@@ -59,7 +67,7 @@ class KiCadPlugin(MyDialog):
     def onTimer(self, event):
         try:
             self.kicad.ping()  # always returns zero
-        except:
+        except Exception:
             logging.debug("ping failed.")
             self.timer.Stop()
             self.Close()
@@ -71,35 +79,16 @@ class KiCadPlugin(MyDialog):
         self.m_staticText.SetLabel("Done")
 
 
-class ActionKiCadPlugin:
-
-    def __init__(self, kicad: KiCad):
-        self.kicad = kicad
-        self.Run()
-
-    def Run(self):
-        logging.debug("run()")
-        logging.debug(f"Connected to KiCad {self.kicad.get_version()}")
-        try:
-            board = self.kicad.get_board()
-        except:
-            board = None
-            logging.ERROR("Open board.")
-
-        plugin_dialog = KiCadPlugin(self.kicad, board)
-        plugin_dialog.ShowModal()
-        plugin_dialog.Destroy()
-        logging.debug("stop plugin")
-
-
 if __name__ == "__main__":
     logging.debug("Start main()")
-    app = wx.App(False)
+    app = wx.App()
 
     try:
-        kicad = KiCad()
-        plugin = ActionKiCadPlugin(kicad)
-    except Exception as e:
+        plugin = KiCadPlugin()
+        plugin.ShowModal()
+        plugin.Destroy()
+    except errors.ConnectionError:
+        print("Error connecting to KiCad, probably not an open instance.")
+        logging.exception("ConnectionError")
+    except Exception:
         logging.exception("__main__")
-
-    app.MainLoop()
